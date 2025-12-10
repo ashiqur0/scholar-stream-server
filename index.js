@@ -28,6 +28,9 @@ async function run() {
         // create database
         const db = client.db('scholar-stream');
 
+        // create collection
+        const usersCollections = db.collection('users');
+
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
