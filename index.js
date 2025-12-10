@@ -33,12 +33,21 @@ async function run() {
         // create collection
         const usersCollection = db.collection('users');
 
+        // create user | login, register, social login page
         app.post('/users', async (req, res) => {
             const user = req.body;
             user.role = 'student';
             
             const result = await usersCollection.insertOne(user);
             res.send(result);
+        });
+
+        // get user role | useRole Hook
+        app.get('/users/:email/role', async (req, res) => {
+            const email = req.params.email;
+            const query = { email };
+            const user = await usersCollection.findOne(query);
+            res.send({ role: user?.role || 'user' });
         });
 
         // Send a ping to confirm a successful connection
