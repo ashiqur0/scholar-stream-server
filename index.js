@@ -47,7 +47,7 @@ async function run() {
             const email = req.params.email;
             const query = { email };
             const user = await usersCollection.findOne(query);
-            res.send({ role: user?.role || 'user' });
+            res.send({ role: user?.role || 'student' });
         });
 
         // Send a ping to confirm a successful connection
