@@ -29,14 +29,22 @@ async function run() {
         const db = client.db('scholar-stream');
 
         // create collection
-        const usersCollections = db.collection('users');
+        const usersCollection = db.collection('users');
+
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            user.role = 'student';
+            
+            const result = await usersCollection.insertOne(user);
+            res.send(result);
+        });
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
-        await client.close();
+        // await client.close();
     }
 }
 run().catch(console.dir);
