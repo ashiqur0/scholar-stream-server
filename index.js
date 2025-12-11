@@ -39,7 +39,7 @@ async function run() {
             user.role = 'student';
             const email = user.email;
 
-            const userExist = await usersCollection.find({ email });
+            const userExist = await usersCollection.findOne({ email });
             if (userExist) {
                 return res.send({message: 'user already exists'})
             }
