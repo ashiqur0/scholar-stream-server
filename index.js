@@ -125,7 +125,22 @@ async function run() {
             const cursor = scholarshipCollection.find().sort({scholarshipPostDate: -1}).limit(6);
             const result = await cursor.toArray();
             res.send(result);
-        })
+        });
+
+        // application related api
+        app.post('/application', verifyJWTToken, async (req, res) => {
+            const email = req.query.email;
+            if (email) {
+                // verify user have access to create scholarship
+                if (email !== req.token_email) {
+                    return res.status(403).send({ message: 'forbidden access' });
+                }
+            }
+
+            const scholarship = req.body;
+            const result = await applicationCollection.insertOne(scholarship);
+            res.send(result);
+        });
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
