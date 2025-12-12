@@ -26,8 +26,7 @@ const verifyJWTToken = async (req, res, next) => {
         if (error) {
             return res.status(401).send({message: 'unauthorized access3'});
         }
-
-        console.log('after decoded', decoded);
+        // console.log('after decoded', decoded);
 
         req.token_email = decoded.email;
         next();
@@ -91,7 +90,15 @@ async function run() {
 
         // scholarship related api
         // create scholarship || secure api || 
-        app.post('/scholarship', async (req, res) => {
+        app.post('/scholarship', verifyJWTToken, async (req, res) => {
+            const email = req.query.email;
+            if (email) {
+                // verify user have access to create scholarship
+                if (email !== req.token_email) {
+                    return res.status(403).send({ message: 'forbidden access' });
+                }
+            }
+
             const scholarship = req.body;
             const result = await scholarshipCollection.insertOne(scholarship);
             res.send(result);
