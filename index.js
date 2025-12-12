@@ -58,6 +58,7 @@ async function run() {
         const usersCollection = db.collection('users');
         const scholarshipCollection = db.collection('scholarship');
         const applicationCollection = db.collection('application');
+        const reviewCollection = db.collection('review');
 
         // jwt related api
         app.post('/getToken', (req, res) => {
@@ -94,7 +95,7 @@ async function run() {
             const email = req.params.email;
             const query = { email };
             const user = await usersCollection.findOne(query);
-            res.send({ role: user?._id || '000' });
+            res.send({ id: user?._id || '000' });
         });
 
         // scholarship related api
@@ -113,7 +114,7 @@ async function run() {
             res.send(result);
         });
 
-        // get individual scholarship || secure ip
+        // get individual scholarship || secure api
         app.get('/scholarship/:id', async (req, res) => {
 
             const id = req.params.id;
@@ -136,7 +137,7 @@ async function run() {
         });
 
         // application related api
-        // create application || secure api || jwt verify || role === 'student'
+        // create application || secure api || jwt verify || role === 'student' || no duplicate apply
         app.post('/application', verifyJWTToken, async (req, res) => {
             const email = req.query.email;
             if (email) {
