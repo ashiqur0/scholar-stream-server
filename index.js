@@ -42,9 +42,9 @@ async function run() {
 
             const userExist = await usersCollection.findOne({ email });
             if (userExist) {
-                return res.send({message: 'user already exists'})
+                return res.send({ message: 'user already exists' })
             }
-            
+
             const result = await usersCollection.insertOne(user);
             res.send(result);
         });
@@ -58,12 +58,14 @@ async function run() {
         });
 
         // scholarship related api
+        // create scholarship || secure api || 
         app.post('/scholarship', async (req, res) => {
             const scholarship = req.body;
             const result = await scholarshipCollection.insertOne(scholarship);
             res.send(result);
         });
 
+        // get all scholarship || public api ||
         app.get('/scholarship', async (req, res) => {
             const cursor = scholarshipCollection.find();
             const result = await cursor.toArray();
