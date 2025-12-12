@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
+const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 3000;
@@ -33,6 +34,13 @@ async function run() {
         // create collection
         const usersCollection = db.collection('users');
         const scholarshipCollection = db.collection('scholarship');
+
+        // jwt related api
+        app.post('/getToken', (req, res) => {
+            const loggedUser = req.body;
+            const token = jwt.sign(loggedUser, process.env.JWT_SECRET, { expiresIn: '1h' });
+            res.send({ token: token });
+        });
 
         // create user | login, register, social login page
         app.post('/users', async (req, res) => {
