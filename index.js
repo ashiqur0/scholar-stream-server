@@ -8,7 +8,31 @@ const port = process.env.PORT || 3000;
 
 // middleware
 app.use(express.json());
-app.use(cors())
+app.use(cors());
+
+// middleware: to validate JWT Token
+const verifyJWTToken = async (req, res, next) => {
+    const authorization = req.headers.authorization;
+    if (!authorization) {
+        return res.status(401).send({message: 'unauthorized access1'});
+    }
+
+    const token = authorization.split(' ')[1];
+    if (!token) {
+        return res.status(401).send({message: 'unauthorized access2'});
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET, (error, decoded) => {
+        if (error) {
+            return res.status(401).send({message: 'unauthorized access3'});
+        }
+
+        console.log('after decoded', decoded);
+
+        req.token_email = decoded.email;
+        next();
+    })
+}
 
 // mongodb connection uri
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.edix7i0.mongodb.net/?appName=Cluster0`;
