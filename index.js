@@ -109,6 +109,12 @@ async function run() {
             const cursor = scholarshipCollection.find();
             const result = await cursor.toArray();
             res.send(result);
+        });
+
+        app.get('/latest-scholarship', async (req, res) => {
+            const cursor = scholarshipCollection.find().sort({scholarshipPostDate: -1}).limit(6);
+            const result = await cursor.toArray();
+            res.send(result);
         })
 
         // Send a ping to confirm a successful connection
