@@ -32,7 +32,7 @@ async function run() {
 
         // create collection
         const usersCollection = db.collection('users');
-        const scholarshipCollection = db.collection('users');
+        const scholarshipCollection = db.collection('scholarship');
 
         // create user | login, register, social login page
         app.post('/users', async (req, res) => {
