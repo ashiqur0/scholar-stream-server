@@ -57,6 +57,13 @@ async function run() {
             res.send({ role: user?.role || 'student' });
         });
 
+        // scholarship related api
+        app.post('/scholarship', async (req, res) => {
+            const scholarship = req.body;
+            const result = await scholarshipCollection.insertOne(scholarship);
+            res.send(result);
+        });
+
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
