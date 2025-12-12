@@ -89,6 +89,14 @@ async function run() {
             res.send({ role: user?.role || 'student' });
         });
 
+        // get user id | useId Hook
+        app.get('/users/:email/id', async (req, res) => {
+            const email = req.params.email;
+            const query = { email };
+            const user = await usersCollection.findOne(query);
+            res.send({ role: user?._id || '000' });
+        });
+
         // scholarship related api
         // create scholarship || secure api || 
         app.post('/scholarship', verifyJWTToken, async (req, res) => {
@@ -128,6 +136,7 @@ async function run() {
         });
 
         // application related api
+        // create application || secure api || jwt verify || role === 'student'
         app.post('/application', verifyJWTToken, async (req, res) => {
             const email = req.query.email;
             if (email) {
