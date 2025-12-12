@@ -57,6 +57,7 @@ async function run() {
         // create collection
         const usersCollection = db.collection('users');
         const scholarshipCollection = db.collection('scholarship');
+        const applicationCollection = db.collection('application');
 
         // jwt related api
         app.post('/getToken', (req, res) => {
@@ -105,15 +106,8 @@ async function run() {
         });
 
         // get individual scholarship || secure ip
-        app.get('/scholarship/:id', verifyJWTToken, async (req, res) => {
-            const email = req.query.email;
-            if (email) {
-                // verify user have access to create scholarship
-                if (email !== req.token_email) {
-                    return res.status(403).send({ message: 'forbidden access' });
-                }
-            }
-            
+        app.get('/scholarship/:id', async (req, res) => {
+
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await scholarshipCollection.findOne(query);
