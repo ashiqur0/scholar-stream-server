@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -101,6 +101,22 @@ async function run() {
 
             const scholarship = req.body;
             const result = await scholarshipCollection.insertOne(scholarship);
+            res.send(result);
+        });
+
+        // get individual scholarship || secure ip
+        app.get('/scholarship/:id', verifyJWTToken, async (req, res) => {
+            const email = req.query.email;
+            if (email) {
+                // verify user have access to create scholarship
+                if (email !== req.token_email) {
+                    return res.status(403).send({ message: 'forbidden access' });
+                }
+            }
+            
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await scholarshipCollection.findOne(query);
             res.send(result);
         });
 
