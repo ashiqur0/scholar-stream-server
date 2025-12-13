@@ -130,6 +130,15 @@ async function run() {
             res.send(result);
         });
 
+        // secure api || for admin, manage scholarship || jwt verify need || admin verify need
+        app.delete('/scholarship/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+
+            const result = await scholarshipCollection.deleteOne(query);
+            res.send(result);
+        })
+
         app.get('/latest-scholarship', async (req, res) => {
             const cursor = scholarshipCollection.find().sort({ scholarshipPostDate: -1 }).limit(6);
             const result = await cursor.toArray();
@@ -152,6 +161,7 @@ async function run() {
             res.send(result);
         });
 
+        // secure api || moderator only protection needed || jwt validation needed
         app.patch('/applications/:id', async (req, res) => {
             const id = req.params.id;
             const status = req.body.applicationStatus;
@@ -166,7 +176,7 @@ async function run() {
             res.send(result);
         })
 
-        // secure api|| moderator only|| jwt validation
+        // secure api || moderator only protection needed || jwt validation needed
         app.get('/applications', async (req, res) => {
             const cursor = applicationCollection.find();
             const result = await cursor.toArray();
