@@ -105,6 +105,21 @@ async function run() {
             res.send(result);
         });
 
+        // secure api || admin only protection needed || jwt validation needed
+        app.patch('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            const role = req.body.role;
+            const query = { _id: new ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    role: role
+                }
+            }
+
+            const result = await usersCollection.updateOne(query, updatedDoc);
+            res.send(result);
+        })
+
         // scholarship related api
         // create scholarship || secure api || 
         app.post('/scholarship', verifyJWTToken, async (req, res) => {
