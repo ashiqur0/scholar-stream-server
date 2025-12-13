@@ -214,6 +214,28 @@ async function run() {
             res.send(result);
         });
 
+        // mongodb aggregate pipeline
+        app.get('/applications/application-status/stats', async (req, res) => {
+            const pipeline = [
+                {
+                    $group: {
+                        _id: '$applicationStatus',
+                        count: { $sum: 1 }
+                    }
+                },
+                {
+                    $project: {
+                        status: '$_id',
+                        count: 1,
+                        _id: 0
+                    }
+                }
+            ]
+
+            const result = await applicationCollection.aggregate(pipeline).toArray();
+            res.send(result);
+        })
+
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
