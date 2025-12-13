@@ -14,17 +14,17 @@ app.use(cors());
 const verifyJWTToken = async (req, res, next) => {
     const authorization = req.headers.authorization;
     if (!authorization) {
-        return res.status(401).send({message: 'unauthorized access1'});
+        return res.status(401).send({ message: 'unauthorized access1' });
     }
 
     const token = authorization.split(' ')[1];
     if (!token) {
-        return res.status(401).send({message: 'unauthorized access2'});
+        return res.status(401).send({ message: 'unauthorized access2' });
     }
 
     jwt.verify(token, process.env.JWT_SECRET, (error, decoded) => {
         if (error) {
-            return res.status(401).send({message: 'unauthorized access3'});
+            return res.status(401).send({ message: 'unauthorized access3' });
         }
         // console.log('after decoded', decoded);
 
@@ -131,7 +131,7 @@ async function run() {
         });
 
         app.get('/latest-scholarship', async (req, res) => {
-            const cursor = scholarshipCollection.find().sort({scholarshipPostDate: -1}).limit(6);
+            const cursor = scholarshipCollection.find().sort({ scholarshipPostDate: -1 }).limit(6);
             const result = await cursor.toArray();
             res.send(result);
         });
@@ -151,6 +151,20 @@ async function run() {
             const result = await applicationCollection.insertOne(scholarship);
             res.send(result);
         });
+
+        app.patch('/applications/:id', async (req, res) => {
+            const id = req.params.id;
+            const status = req.body.applicationStatus;
+            const query = { _id: new ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    applicationStatus: status
+                }
+            }
+
+            const result = await applicationCollection.updateOne(query, updatedDoc);
+            res.send(result);
+        })
 
         // secure api|| moderator only|| jwt validation
         app.get('/applications', async (req, res) => {
