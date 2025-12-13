@@ -118,6 +118,15 @@ async function run() {
 
             const result = await usersCollection.updateOne(query, updatedDoc);
             res.send(result);
+        });
+
+        // secure api || for admin, manage scholarship || jwt verify need || admin verify need
+        app.delete('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+
+            const result = await usersCollection.deleteOne(query);
+            res.send(result);
         })
 
         // scholarship related api
