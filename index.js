@@ -207,6 +207,19 @@ async function run() {
             res.send(result);
         })
 
+        // secure api || student only protection needed || jwt validation needed
+        app.get('/applications', async (req, res) => {
+            const {email} = req.query;
+            const query = {};
+            if (email) {
+                query.userEmail = email;
+            }
+
+            const cursor = applicationCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
+        });
+
         // secure api || moderator only protection needed || jwt validation needed
         app.get('/applications', async (req, res) => {
             const cursor = applicationCollection.find();
