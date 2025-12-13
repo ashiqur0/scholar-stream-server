@@ -98,6 +98,13 @@ async function run() {
             res.send({ id: user?._id || '000' });
         });
 
+        // get user || secure api || admin verification need || jwt token verification need
+        app.get('/users', async (req, res) => {
+            const cursor = usersCollection.find();
+            const result = await cursor.toArray();
+            res.send(result);
+        });
+
         // scholarship related api
         // create scholarship || secure api || 
         app.post('/scholarship', verifyJWTToken, async (req, res) => {
