@@ -314,6 +314,17 @@ async function run() {
             res.send(result);
         });
 
+        app.get('/review', async (req, res) => {
+            const email = req.query.email;
+            const query = {};
+            if (email) {
+                query.email = email;
+            }
+            const cursor = reviewCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
+        });
+
         app.get('/review/:id', async (req, res) => {
             const id = req.params.id;
             const query = { 
