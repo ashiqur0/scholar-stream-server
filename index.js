@@ -156,9 +156,29 @@ async function run() {
 
         // get all scholarship || public api ||
         app.get('/scholarship', async (req, res) => {
-            const cursor = scholarshipCollection.find();
-            const result = await cursor.toArray();
-            res.send(result);
+            const { limit, skip, sort = 'size', order = 'desc', search } = req.query;
+            // search query
+            const query = search ? {
+                $or: [
+                    { scholarshipName: { $regex: search, $options: 'i' } },
+                    { universityName: { $regex: search, $options: 'i' } },
+                    { degree: { $regex: search, $options: 'i' } }
+                ]
+            } : {};
+
+            const sortOption = {};
+            sortOption[sort || 'size'] = order === 'asc' ? 1 : -1;
+
+            const scholarships = await scholarshipCollection
+                .find(query)
+                .sort(sortOption)
+                .limit(Number(limit))
+                .skip(Number(skip))
+                .project({ description: 0 })
+                .toArray();
+
+            const count = await scholarshipCollection.countDocuments(query);
+            res.send({ scholarships, total: count });
         });
 
         // secure api || for admin, manage scholarship || jwt verify need || admin verify need
@@ -209,7 +229,7 @@ async function run() {
 
         // secure api || student only protection needed || jwt validation needed
         app.get('/applications', async (req, res) => {
-            const {email} = req.query;
+            const { email } = req.query;
             const query = {};
             if (email) {
                 query.userEmail = email;
