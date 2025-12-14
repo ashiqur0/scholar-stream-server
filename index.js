@@ -310,6 +310,13 @@ async function run() {
         // review related api
         app.post('/review', async (req, res) => {
             const review = req.body;
+
+            const { scholarshipId } = review;
+            const query = { _id: new ObjectId(scholarshipId) };
+            const scholarship = await scholarshipCollection.findOne(query);
+            review.scholarshipName = scholarship.scholarshipName;
+            review.universityName = scholarship.universityName;
+
             const result = await reviewCollection.insertOne(review);
             res.send(result);
         });
@@ -335,7 +342,7 @@ async function run() {
 
         app.get('/review/:id', async (req, res) => {
             const id = req.params.id;
-            const query = { 
+            const query = {
                 scholarshipId: id
             };
             const cursor = reviewCollection.find(query);
