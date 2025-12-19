@@ -344,6 +344,21 @@ async function run() {
 
             const result = await applicationCollection.updateOne(query, updatedDoc);
             res.send(result);
+        });
+
+        // delete application | secure api | JWT Token Verified | Student Verified | Used in MyApplication Page
+        app.delete('/applications/:id', verifyJWTToken, verifyStudent, async (req, res) => {
+            const tokenEmail = req.token_email;
+            const { email } = req.query;
+            
+            if (tokenEmail !== email) {
+                return res.status(403).send({ message: 'forbidden access' });
+            }
+            
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await applicationCollection.deleteOne(query);
+            res.send(result);
         })
 
         //  get individuals user's all application | secure api | JWT Verified | Student Verified | Email Verified | Used In | Also Need To Implement UserId Verification In Future
@@ -410,7 +425,7 @@ async function run() {
             if (tokenEmail !== email) {
                 return res.status(403).send({ message: 'forbidden access' });
             }
-            
+
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
 
