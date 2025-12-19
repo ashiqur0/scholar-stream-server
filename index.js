@@ -144,7 +144,7 @@ async function run() {
             res.send(result);
         });
 
-        // secure api || admin only protection needed || jwt validation needed
+        // secure api || Verify Admin Only Access || JWT Token Verified | used in UserManagement Page
         app.patch('/users/:id', verifyJWTToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const role = req.body.role;
@@ -159,7 +159,7 @@ async function run() {
             res.send(result);
         });
 
-        // secure api || for admin, manage scholarship || jwt verify need || admin verify need
+        // secure api || Verify Admin Only Access || JWT Token Verified | used in UserManagement Page
         app.delete('/users/:id', verifyJWTToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
@@ -169,8 +169,8 @@ async function run() {
         })
 
         // scholarship related api
-        // create scholarship || secure api || 
-        app.post('/scholarship', verifyJWTToken, async (req, res) => {
+        // secure api || Verify Admin Only Access || JWT Token Verified | used in AddScholarship Page
+        app.post('/scholarship', verifyJWTToken, verifyAdmin, async (req, res) => {
             const email = req.query.email;
             if (email) {
                 // verify user have access to create scholarship
