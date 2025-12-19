@@ -50,10 +50,10 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
+        // await client.connect();
 
         // create database
-        // const db = client.db('scholar-stream');
+        const db = client.db('scholar-stream');
 
         // create collection
         const usersCollection = db.collection('users');
@@ -127,6 +127,14 @@ async function run() {
             const query = { email };
             const user = await usersCollection.findOne(query);
             res.send({ role: user?.role || 'student' });
+        });
+
+        // get user id | secure api | useId Hook which is used in scholarship details page to apply scholarship
+        app.get('/users/:email/id', verifyJWTToken, verifyStudent, async (req, res) => {
+            const email = req.params.email;
+            const query = { email };
+            const user = await usersCollection.findOne(query);
+            res.send({ id: user?._id || '000' });
         });
 
         // get user || secure api || admin verification need || jwt token verification need
