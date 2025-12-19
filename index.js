@@ -366,7 +366,7 @@ async function run() {
             res.send(result);
         });
 
-        // mongodb aggregate pipeline | secure api | JWT Verified | Moderator Verified | Used In Analytics Page
+        // mongodb aggregate pipeline | secure api | JWT Verified | Admin Verified | Used In Analytics Page
         app.get('/applications/application-status/stats', verifyJWTToken, verifyAdmin, async (req, res) => {
             const pipeline = [
                 {
@@ -418,7 +418,8 @@ async function run() {
             res.send(result);
         })
 
-        app.get('/review', async (req, res) => {
+        // get list of reviews | secure API | JWT Verified | Student Verified | Used In My Review Page
+        app.get('/review', verifyJWTToken, verifyStudent, async (req, res) => {
             const email = req.query.email;
             const query = {};
             if (email) {
