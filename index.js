@@ -3,20 +3,13 @@ const cors = require('cors');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const stripe = require('stripe')(process.env.STRIPE_SECRET);
 const app = express();
 const port = process.env.PORT || 3000;
 
 // middleware
 app.use(express.json());
 app.use(cors());
-
-const admin = require("firebase-admin");
-// const serviceAccount = require("./scholar-stream-firebase-adminsdk.json");
-const decoded = Buffer.from(process.env.FB_SERVICE_KEY, 'base64').toString('utf8')
-const serviceAccount = JSON.parse(decoded);
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
-});
 
 // middleware: to validate JWT Token
 const verifyJWTToken = async (req, res, next) => {
@@ -78,7 +71,7 @@ async function run() {
         // middleware with database access
         // must be used after firebaseToken verification middleware
         const verifyAdmin = async (req, res, next) => {
-            const email = req.decoded_email;
+            const email = req.token_email;
             const query = { email };
             const user = await usersCollection.findOne(query);
 
@@ -90,7 +83,7 @@ async function run() {
         }
 
         const verifyModerator = async (req, res, next) => {
-            const email = req.decoded_email;
+            const email = req.token_email;
             const query = { email };
             const user = await usersCollection.findOne(query);
 
@@ -102,7 +95,7 @@ async function run() {
         }
 
         const verifyStudent = async (req, res, next) => {
-            const email = req.decoded_email;
+            const email = req.token_email;
             const query = { email };
             const user = await usersCollection.findOne(query);
 
@@ -152,7 +145,7 @@ async function run() {
         });
 
         // secure api || admin only protection needed || jwt validation needed
-        app.patch('/users/:id', async (req, res) => {
+        app.patch('/users/:id', verifyJWTToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const role = req.body.role;
             const query = { _id: new ObjectId(id) };
@@ -167,7 +160,7 @@ async function run() {
         });
 
         // secure api || for admin, manage scholarship || jwt verify need || admin verify need
-        app.delete('/users/:id', async (req, res) => {
+        app.delete('/users/:id', verifyJWTToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
 
@@ -244,22 +237,87 @@ async function run() {
 
         // application related api
         // create application || secure api || jwt verify || role === 'student' || no duplicate apply
-        app.post('/application', verifyJWTToken, async (req, res) => {
-            const email = req.query.email;
-            if (email) {
-                // verify user have access to create scholarship
-                if (email !== req.token_email) {
-                    return res.status(403).send({ message: 'forbidden access' });
-                }
+        // stripe payment get way integration
+        app.post('/application', verifyJWTToken, verifyStudent, async (req, res) => {
+            const applicationInfo = req.body;
+
+            const amount = (parseInt(applicationInfo.applicationFees) + parseInt(applicationInfo.serviceCharge)) * 100;
+            const session = await stripe.checkout.sessions.create({
+                line_items: [
+                    {
+                        price_data: {
+                            currency: 'usd',
+                            unit_amount: amount,
+                            product_data: {
+                                name: `Please pay for ${applicationInfo.scholarshipName}`,
+                            }
+                        },
+                        quantity: 1,
+                    },
+                ],
+                customer_email: applicationInfo.userEmail,
+                mode: 'payment',
+                metadata: {
+                    scholarshipId: applicationInfo.scholarshipId,
+                    scholarshipName: applicationInfo.scholarshipName,
+                    userId: applicationInfo.userId,
+                    userName: applicationInfo.userName,
+                    universityName: applicationInfo.universityName,
+                    scholarshipCategory: applicationInfo.scholarshipCategory,
+                    degree: applicationInfo.degree,
+                    serviceCharge: applicationInfo.serviceCharge,
+                },
+                success_url: `${process.env.SITE_DOMAIN}/dashboard/application-success?session_id={CHECKOUT_SESSION_ID}`,
+                cancel_url: `${process.env.SITE_DOMAIN}/dashboard/application-cancelled?scholarshipId=${applicationInfo.scholarshipId}`,
+            })
+
+            res.send({ url: session.url });
+        });
+
+        app.post('/application-success', async (req, res) => {
+            const sessionId = req.query.session_id;
+            const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+            // prevent second time insertion
+            const transactionId = session.payment_intent;
+            const query = { transactionId: transactionId };
+            const paymentExist = await applicationCollection.findOne(query);
+            if (paymentExist) {
+                return res.send({
+                    message: 'already exist',
+                    transactionId,
+                    trackingId: paymentExist.trackingId
+                });
             }
 
-            const scholarship = req.body;
-            const result = await applicationCollection.insertOne(scholarship);
-            res.send(result);
+            // use the previous tracking id created during the parcel create which was set to the session metadata during session creation
+            if (session.payment_status === 'paid') {
+                const application = {
+                    scholarshipId: session.metadata.scholarshipId,
+                    scholarshipName: session.metadata.scholarshipName,
+                    userName: session.metadata.userName,                    
+                    userId: session.metadata.userId,
+                    universityName: session.metadata.universityName,
+                    scholarshipCategory: session.metadata.scholarshipCategory,
+                    degree: session.metadata.degree,
+                    serviceCharge: session.metadata.serviceCharge,
+                    transactionId: transactionId,
+                    currency: session.currency,
+                    userEmail: session.customer_email,
+                    applicationFees: session.amount_total / 100,
+                    applicationStatus: 'pending',
+                    paymentStatus: session.payment_status,
+                    applicationDate: new Date(),
+                    feedback: ''
+                }
+
+                const result = await applicationCollection.insertOne(application);
+                res.send(result);
+            }
         });
 
         // secure api || moderator only protection needed || jwt validation needed
-        app.patch('/applications/:id', async (req, res) => {
+        app.patch('/applications/:id', verifyJWTToken, verifyModerator, async (req, res) => {
             const id = req.params.id;
             const status = req.body.applicationStatus;
             const query = { _id: new ObjectId(id) };

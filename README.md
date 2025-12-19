@@ -9,7 +9,7 @@
 # 🛠️ ScholarStream – Server Side  
 ### Scholarship Management Platform (Backend)
 
-🌐 **API Base URL:** https://scholar-strem-server-by-ashiqur-3ozaop4zn.vercel.app/ 
+🌐 **API Base URL:** https://scholar-strem-server-by-ashiqur.vercel.app/ 
 📁 **Repository Type:** Server / Backend  
 🧑‍💻 **Tech Stack:** MERN (Backend)
 
