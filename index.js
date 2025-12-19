@@ -50,7 +50,7 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        // await client.connect();
+        await client.connect();
 
         // create database
         const db = client.db('scholar-stream');
@@ -230,7 +230,21 @@ async function run() {
         })
 
         app.get('/latest-scholarship', async (req, res) => {
-            const cursor = scholarshipCollection.find().sort({ scholarshipPostDate: -1 }).limit(6);
+            const { search } = req.query;
+
+            // search query
+            const query = search ? {
+                $or: [
+                    { scholarshipName: { $regex: search, $options: 'i' } },
+                    { universityName: { $regex: search, $options: 'i' } },
+                    { degree: { $regex: search, $options: 'i' } }
+                ]
+            } : {};
+
+            const cursor = scholarshipCollection
+                .find(query)
+                .sort({ scholarshipPostDate: -1 })
+                .limit(6);
             const result = await cursor.toArray();
             res.send(result);
         });
@@ -295,7 +309,7 @@ async function run() {
                 const application = {
                     scholarshipId: session.metadata.scholarshipId,
                     scholarshipName: session.metadata.scholarshipName,
-                    userName: session.metadata.userName,                    
+                    userName: session.metadata.userName,
                     userId: session.metadata.userId,
                     universityName: session.metadata.universityName,
                     scholarshipCategory: session.metadata.scholarshipCategory,
@@ -417,8 +431,8 @@ async function run() {
         });
 
         // Send a ping to confirm a successful connection
-        // await client.db("admin").command({ ping: 1 });
-        // console.log("Pinged your deployment. You successfully connected to MongoDB!");
+        await client.db("admin").command({ ping: 1 });
+        console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
         // await client.close();
