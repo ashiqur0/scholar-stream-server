@@ -359,8 +359,8 @@ async function run() {
             res.send(result);
         });
 
-        // secure api || moderator only protection needed || jwt validation needed
-        app.get('/applications', async (req, res) => {
+        // secure api | JWT Verified | Moderator Verified | 
+        app.get('/applications/moderator', verifyJWTToken, verifyModerator, async (req, res) => {
             const cursor = applicationCollection.find();
             const result = await cursor.toArray();
             res.send(result);
