@@ -137,8 +137,8 @@ async function run() {
             res.send({ id: user?._id || '000' });
         });
 
-        // get user || secure api || admin verification need || jwt token verification need
-        app.get('/users', async (req, res) => {
+        // get user || secure api || admin verification need || jwt token verification need | use in UserManagement page
+        app.get('/users', verifyJWTToken, verifyAdmin, async (req, res) => {
             const cursor = usersCollection.find();
             const result = await cursor.toArray();
             res.send(result);
