@@ -50,7 +50,7 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
+        // await client.connect();
 
         // create database
         const db = client.db('scholar-stream');
@@ -388,8 +388,8 @@ async function run() {
             res.send(result);
         })
 
-        // review related api
-        app.post('/review', async (req, res) => {
+        // review related api | secure api | JWT Token Verified | Used In Scholarship Details Page
+        app.post('/review', verifyJWTToken, async (req, res) => {
             const review = req.body;
 
             const { scholarshipId } = review;
@@ -432,8 +432,8 @@ async function run() {
         });
 
         // Send a ping to confirm a successful connection
-        await client.db("admin").command({ ping: 1 });
-        console.log("Pinged your deployment. You successfully connected to MongoDB!");
+        // await client.db("admin").command({ ping: 1 });
+        // console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
         // await client.close();
