@@ -331,7 +331,7 @@ async function run() {
             }
         });
 
-        // secure api || moderator only protection needed || jwt validation needed
+        // secure api | JWT Verified | Moderator Verified | Used in ManageAppliedApplication Page
         app.patch('/applications/:id', verifyJWTToken, verifyModerator, async (req, res) => {
             const id = req.params.id;
             const status = req.body.applicationStatus;
@@ -346,8 +346,8 @@ async function run() {
             res.send(result);
         })
 
-        // secure api || student only protection needed || jwt validation needed
-        app.get('/applications', async (req, res) => {
+        //  get individuals user's all application | secure api | JWT Verified | Student Verified | Email Verified | Used In | Also Need To Implement UserId Verification In Future
+        app.get('/applications', verifyJWTToken, verifyStudent, async (req, res) => {
             const { email } = req.query;
             const query = {};
             if (email) {
