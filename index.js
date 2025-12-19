@@ -61,14 +61,14 @@ async function run() {
         const applicationCollection = db.collection('application');
         const reviewCollection = db.collection('review');
 
-        // jwt related api
+        // jwt related api || generate access token
         app.post('/getToken', (req, res) => {
             const loggedUser = req.body;
             const token = jwt.sign(loggedUser, process.env.JWT_SECRET, { expiresIn: '1h' });
             res.send({ token: token });
         });
 
-        // middleware with database access
+        // middleware with database access | authorization
         // must be used after firebaseToken verification middleware
         const verifyAdmin = async (req, res, next) => {
             const email = req.token_email;
@@ -106,7 +106,7 @@ async function run() {
             next();
         }
 
-        // create user | login, register, social login page
+        // create user | public api | but email validation will improve it | used in login, register, social login page
         app.post('/users', async (req, res) => {
             const user = req.body;
             user.role = 'student';
@@ -121,8 +121,8 @@ async function run() {
             res.send(result);
         });
 
-        // get user role | useRole Hook
-        app.get('/users/:email/role', async (req, res) => {
+        // get user role | secure api | used in useRole Hook |
+        app.get('/users/:email/role', verifyJWTToken, async (req, res) => {
             const email = req.params.email;
             const query = { email };
             const user = await usersCollection.findOne(query);
