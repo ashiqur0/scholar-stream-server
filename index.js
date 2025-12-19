@@ -130,7 +130,7 @@ async function run() {
         });
 
         // get user id | secure api | useId Hook which is used in scholarship details page to apply scholarship
-        app.get('/users/:email/id', verifyJWTToken, verifyStudent, async (req, res) => {
+        app.get('/users/:email/id', verifyJWTToken, async (req, res) => {
             const email = req.params.email;
             const query = { email };
             const user = await usersCollection.findOne(query);
@@ -430,6 +430,7 @@ async function run() {
             res.send(result);
         });
 
+        // public api | used in ScholarshipDetails Page
         app.get('/review/:id', async (req, res) => {
             const id = req.params.id;
             const query = {
