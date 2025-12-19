@@ -402,7 +402,15 @@ async function run() {
             res.send(result);
         });
 
-        app.delete('/review/:id', async (req, res) => {
+        // delete review | secure api | Verified By JWT Token | Verified By User Email
+        app.delete('/review/:id', verifyJWTToken, verifyStudent, async (req, res) => {
+            const tokenEmail = req.token_email;
+            const { email } = req.query;
+
+            if (tokenEmail !== email) {
+                return res.status(403).send({ message: 'forbidden access' });
+            }
+            
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
 
