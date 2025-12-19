@@ -192,7 +192,7 @@ async function run() {
             res.send(result);
         });
 
-        // get all scholarship || public api ||
+        // get all scholarship || public api || used in AllScholarship Page
         app.get('/scholarship', async (req, res) => {
             const { limit, skip, sort = 'size', order = 'desc', search } = req.query;
             // search query
@@ -219,8 +219,8 @@ async function run() {
             res.send({ scholarships, total: count });
         });
 
-        // secure api || for admin, manage scholarship || jwt verify need || admin verify need
-        app.delete('/scholarship/:id', async (req, res) => {
+        // secure api || Verify Admin Only Access || JWT Token Verified | used in ManageScholarship Page
+        app.delete('/scholarship/:id', verifyJWTToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
 
