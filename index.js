@@ -350,11 +350,11 @@ async function run() {
         app.delete('/applications/:id', verifyJWTToken, verifyStudent, async (req, res) => {
             const tokenEmail = req.token_email;
             const { email } = req.query;
-            
+
             if (tokenEmail !== email) {
                 return res.status(403).send({ message: 'forbidden access' });
             }
-            
+
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await applicationCollection.deleteOne(query);
@@ -369,7 +369,7 @@ async function run() {
                 query.userEmail = email;
             }
 
-            const cursor = applicationCollection.find(query);
+            const cursor = applicationCollection.find(query).sort({ applicationDate: -1 });
             const result = await cursor.toArray();
             res.send(result);
         });
