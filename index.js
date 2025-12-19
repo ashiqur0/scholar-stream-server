@@ -228,6 +228,7 @@ async function run() {
             res.send(result);
         })
 
+        // get latest scholarship | public api | used in Home Page
         app.get('/latest-scholarship', async (req, res) => {
             const { search } = req.query;
 
@@ -249,7 +250,7 @@ async function run() {
         });
 
         // application related api
-        // create application || secure api || jwt verify || role === 'student' || no duplicate apply
+        // secure api || JWT Token Verified || Student Role Verified
         // stripe payment get way integration
         app.post('/application', verifyJWTToken, verifyStudent, async (req, res) => {
             const applicationInfo = req.body;
@@ -287,7 +288,8 @@ async function run() {
             res.send({ url: session.url });
         });
 
-        app.post('/application-success', async (req, res) => {
+        // create application || after payment success || no duplicate apply | secure api | JWT Verified | Student Verified
+        app.post('/application-success', verifyJWTToken, verifyStudent, async (req, res) => {
             const sessionId = req.query.session_id;
             const session = await stripe.checkout.sessions.retrieve(sessionId);
 
