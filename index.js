@@ -445,6 +445,13 @@ async function run() {
             res.send(result);
         });
 
+        // get all of reviews | secure API | JWT Verified | Moderator Verified | Used In All Review Page
+        app.get('/review/all-review', verifyJWTToken, verifyModerator, async (req, res) => {
+            const cursor = reviewCollection.find();
+            const result = await cursor.toArray();
+            res.send(result);
+        });
+
         // public api | used in ScholarshipDetails Page
         app.get('/review/:id', async (req, res) => {
             const id = req.params.id;
