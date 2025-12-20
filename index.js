@@ -423,11 +423,32 @@ async function run() {
         });
 
         // mongodb aggregate pipeline | secure api | JWT Verified | Admin Verified | Used In Analytics Page
-        app.get('/applications/application-status/stats', verifyJWTToken, verifyAdmin, async (req, res) => {
+        app.get('/applications/application-status/scholarshipCategory', verifyJWTToken, verifyAdmin, async (req, res) => {
             const pipeline = [
                 {
                     $group: {
                         _id: '$scholarshipCategory',
+                        count: { $sum: 1 }
+                    }
+                },
+                {
+                    $project: {
+                        status: '$_id',
+                        count: 1,
+                        _id: 0
+                    }
+                }
+            ]
+
+            const result = await applicationCollection.aggregate(pipeline).toArray();
+            res.send(result);
+        })
+        
+        app.get('/applications/application-status/universityName', verifyJWTToken, verifyAdmin, async (req, res) => {
+            const pipeline = [
+                {
+                    $group: {
+                        _id: '$universityName',
                         count: { $sum: 1 }
                     }
                 },
