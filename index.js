@@ -50,7 +50,7 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        // await client.connect();
+        await client.connect();
 
         // create database
         const db = client.db('scholar-stream');
@@ -139,7 +139,18 @@ async function run() {
 
         // get user || secure api || admin verification need || jwt token verification need | use in UserManagement page
         app.get('/users', verifyJWTToken, verifyAdmin, async (req, res) => {
-            const cursor = usersCollection.find();
+            const { sort } = req.query;
+
+            const query = {}
+            if (sort === 'admin') {
+                query.role = 'admin';
+            } else if (sort === 'moderator') {
+                query.role = 'moderator';
+            } else if (sort === 'student') {
+                query.role = 'student';
+            }
+
+            const cursor = usersCollection.find(query);
             const result = await cursor.toArray();
             res.send(result);
         });
@@ -502,8 +513,8 @@ async function run() {
         });
 
         // Send a ping to confirm a successful connection
-        // await client.db("admin").command({ ping: 1 });
-        // console.log("Pinged your deployment. You successfully connected to MongoDB!");
+        await client.db("admin").command({ ping: 1 });
+        console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
         // await client.close();
