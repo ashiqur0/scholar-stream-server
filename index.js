@@ -415,6 +415,12 @@ async function run() {
             res.send(result);
         });
 
+        app.get('/applications2', async (req, res) => {
+            const cursor = applicationCollection.find().sort({ applicationDate: -1 });
+            const result = await cursor.toArray();
+            res.send(result);
+        });
+
         // secure api | JWT Verified | Moderator Verified | 
         app.get('/applications/moderator', verifyJWTToken, verifyModerator, async (req, res) => {
             const cursor = applicationCollection.find();
@@ -443,7 +449,7 @@ async function run() {
             const result = await applicationCollection.aggregate(pipeline).toArray();
             res.send(result);
         })
-        
+
         app.get('/applications/application-status/universityName', verifyJWTToken, verifyAdmin, async (req, res) => {
             const pipeline = [
                 {
@@ -464,6 +470,40 @@ async function run() {
             const result = await applicationCollection.aggregate(pipeline).toArray();
             res.send(result);
         })
+
+        app.get('/applications/stats/summary', async (req, res) => {
+            const pipeline = [
+                {
+                    $group: {
+                        _id: null,
+                        // Sum up all application fees
+                        totalFees: { $sum: "$applicationFees" },
+                        // Collect unique IDs into arrays to count them later
+                        uniqueUsers: { $addToSet: "$userId" },
+                        uniqueScholarships: { $addToSet: "$scholarshipId" }
+                    }
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        totalFees: 1,
+                        // Use $size to get the count of unique items in the arrays
+                        totalUser: { $size: "$uniqueUsers" },
+                        totalScholarship: { $size: "$uniqueScholarships" }
+                    }
+                }
+            ];
+
+            try {
+                const stats = await applicationCollection.aggregate(pipeline).toArray();
+
+                // aggregate returns an array; we send the first object or a default one if empty
+                const result = stats.length > 0 ? stats[0] : { totalFees: 0, totalUser: 0, totalScholarship: 0 };
+                res.send(result);
+            } catch (error) {
+                res.status(500).send({ message: "Error calculating stats", error });
+            }
+        });
 
         // review related api | secure api | JWT Token Verified | Used In Scholarship Details Page
         app.post('/review', verifyJWTToken, async (req, res) => {
