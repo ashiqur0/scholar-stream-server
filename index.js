@@ -228,6 +228,36 @@ async function run() {
             res.send(result);
         })
 
+        // secure api | JWT Verified | Admin Verified | Used in ManageAppliedApplication Page
+        app.patch('/scholarship/:id', verifyJWTToken, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            const data = req.body;
+            const query = { _id: new ObjectId(id) };
+            const updatedScholarshipInfo = {
+                $set: {
+                    scholarshipName: data.scholarshipName,
+                    scholarshipDescription: data.scholarshipDescription,
+                    universityName: data.universityName,
+                    universityImage: data.universityImage,
+                    universityCountry: data.universityCountry,
+                    universityCity: data.universityCity,
+                    universityWorldRank: data.universityWorldRank,
+                    subjectCategory: data.subjectCategory,
+                    scholarshipCategory: data.scholarshipCategory,
+                    degree: data.degree,
+                    tuitionFees: data.tuitionFees,
+                    applicationFees: data.applicationFees,
+                    serviceCharge: data.serviceCharge,
+                    applicationDeadline: data.applicationDeadline,
+                    scholarshipPostDate: data.scholarshipPostDate,
+                    postedUserEmail: data.postedUserEmail,
+                }
+            }
+
+            const result = await scholarshipCollection.updateOne(query, updatedScholarshipInfo);
+            res.send(result);
+        });
+
         // get latest scholarship | public api | used in Home Page
         app.get('/latest-scholarship', async (req, res) => {
             const { search } = req.query;
