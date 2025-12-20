@@ -471,7 +471,7 @@ async function run() {
             res.send(result);
         })
 
-        app.get('/applications/stats/summary', async (req, res) => {
+        app.get('/applications/stats/summary', verifyJWTToken, verifyAdmin, async (req, res) => {
             const pipeline = [
                 {
                     $group: {
