@@ -427,7 +427,7 @@ async function run() {
             const pipeline = [
                 {
                     $group: {
-                        _id: '$applicationStatus',
+                        _id: '$scholarshipCategory',
                         count: { $sum: 1 }
                     }
                 },
