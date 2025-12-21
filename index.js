@@ -562,6 +562,22 @@ async function run() {
             res.send(result);
         });
 
+        // update review api | secure api | JWT Token Verified | Used In My Review Page
+        app.patch('/review/:id', verifyJWTToken, verifyStudent, async (req, res) => {
+            const id = req.params.id;
+            const update = req.body;
+            const query = { _id: new ObjectId(id) };
+
+            const updatedDoc = {
+                $set: {
+                    review: update.review,
+                    rating: update.rating
+                }
+            }
+            const result = await reviewCollection.updateOne(query, updatedDoc);
+            res.send(result);
+        });
+
         // delete review | secure api | Verified By JWT Token | Verified By User Email
         app.delete('/review/:id', verifyJWTToken, verifyStudent, async (req, res) => {
             const tokenEmail = req.token_email;
