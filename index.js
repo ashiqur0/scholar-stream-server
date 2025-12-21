@@ -319,6 +319,8 @@ async function run() {
                     userName: applicationInfo.userName,
                     userImage: applicationInfo.userImage,
                     universityName: applicationInfo.universityName,
+                    universityAddress: applicationInfo.universityAddress,
+                    subjectCategory: applicationInfo.subjectCategory,
                     scholarshipCategory: applicationInfo.scholarshipCategory,
                     degree: applicationInfo.degree,
                     serviceCharge: applicationInfo.serviceCharge,
@@ -356,6 +358,8 @@ async function run() {
                     userId: session.metadata.userId,
                     userImage: session.metadata.userImage,
                     universityName: session.metadata.universityName,
+                    universityAddress: session.metadata.universityAddress,
+                    subjectCategory: session.metadata.subjectCategory,
                     scholarshipCategory: session.metadata.scholarshipCategory,
                     degree: session.metadata.degree,
                     serviceCharge: session.metadata.serviceCharge,
@@ -448,19 +452,6 @@ async function run() {
 
         //  get individuals user's all application | secure api | JWT Verified | Student Verified | Email Verified | Used In | Also Need To Implement UserId Verification In Future
         app.get('/applications', verifyJWTToken, verifyStudent, async (req, res) => {
-            const { email } = req.query;
-            const query = {};
-            if (email) {
-                query.userEmail = email;
-            }
-
-            const cursor = applicationCollection.find(query).sort({ applicationDate: -1 });
-            const result = await cursor.toArray();
-            res.send(result);
-        });
-
-        //  get individuals user's all application | secure api | JWT Verified | Student Verified | Email Verified | Used In | Also Need To Implement UserId Verification In Future
-        app.get('/applications2', async (req, res) => {
             const { email } = req.query;
             const query = {};
             if (email) {
