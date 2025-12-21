@@ -387,6 +387,22 @@ async function run() {
             res.send(result);
         });
 
+        // secure api | JWT Verified | Moderator Verified | Used in ManageAppliedApplication Page
+        app.patch('/feedback/:id', verifyJWTToken, verifyModerator, async (req, res) => {
+            const id = req.params.id;
+            const feedback = req.body.feedback;
+
+            const query = { _id: new ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    feedback: feedback
+                }
+            }
+
+            const result = await applicationCollection.updateOne(query, updatedDoc);
+            res.send(result);
+        });
+
         // delete application | secure api | JWT Token Verified | Student Verified | Used in MyApplication Page
         app.delete('/applications/:id', verifyJWTToken, verifyStudent, async (req, res) => {
             const tokenEmail = req.token_email;
@@ -471,6 +487,7 @@ async function run() {
             res.send(result);
         })
 
+        // totalFess Collected, totalUser, totalScholarship
         app.get('/applications/stats/summary', verifyJWTToken, verifyAdmin, async (req, res) => {
             const pipeline = [
                 {
