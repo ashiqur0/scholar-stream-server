@@ -405,6 +405,32 @@ async function run() {
             res.send(result);
         });
 
+        // secure api | JWT Verified | Moderator Verified | Used in ManageAppliedApplication Page
+        app.patch('/applications/:id/update', verifyJWTToken, verifyStudent, async (req, res) => {
+            const id = req.params.id;
+            const updatedApplicationInfo = req.body;
+
+            const query = { _id: new ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    scholarshipId: updatedApplicationInfo.scholarshipId,
+                    scholarshipName: updatedApplicationInfo.scholarshipName,
+                    userId: updatedApplicationInfo.userId,
+                    userName: updatedApplicationInfo.userName,
+                    userEmail: updatedApplicationInfo.userEmail,
+                    userImage: updatedApplicationInfo.userImage,
+                    universityName: updatedApplicationInfo.universityName,
+                    scholarshipCategory: updatedApplicationInfo.scholarshipCategory,
+                    degree: updatedApplicationInfo.degree,
+                    applicationFees: updatedApplicationInfo.applicationFees,
+                    serviceCharge: updatedApplicationInfo.serviceCharge,
+                }
+            }
+
+            const result = await applicationCollection.updateOne(query, updatedDoc);
+            res.send(result);
+        });
+
         // delete application | secure api | JWT Token Verified | Student Verified | Used in MyApplication Page
         app.delete('/applications/:id', verifyJWTToken, verifyStudent, async (req, res) => {
             const tokenEmail = req.token_email;
@@ -433,8 +459,15 @@ async function run() {
             res.send(result);
         });
 
+        //  get individuals user's all application | secure api | JWT Verified | Student Verified | Email Verified | Used In | Also Need To Implement UserId Verification In Future
         app.get('/applications2', async (req, res) => {
-            const cursor = applicationCollection.find().sort({ applicationDate: -1 });
+            const { email } = req.query;
+            const query = {};
+            if (email) {
+                query.userEmail = email;
+            }
+
+            const cursor = applicationCollection.find(query).sort({ applicationDate: -1 });
             const result = await cursor.toArray();
             res.send(result);
         });
