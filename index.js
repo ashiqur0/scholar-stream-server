@@ -49,7 +49,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
     try {
-        // Connect the client to the server	(optional starting in v4.7)
+        // Connect the client to the server	(optional starting in v4.7) | connection off -> deploy
         // await client.connect();
 
         // create database
@@ -344,14 +344,13 @@ async function run() {
             if (paymentExist) {
                 return res.send({
                     message: 'already exist',
-                    transactionId,
-                    trackingId: paymentExist.trackingId
+                    transactionId
                 });
             }
 
             // use the previous tracking id created during the parcel create which was set to the session metadata during session creation
             if (session.payment_status === 'paid') {
-                const application = {
+                const applicationInfo = {
                     scholarshipId: session.metadata.scholarshipId,
                     scholarshipName: session.metadata.scholarshipName,
                     userName: session.metadata.userName,
@@ -373,7 +372,7 @@ async function run() {
                     feedback: ''
                 }
 
-                const result = await applicationCollection.insertOne(application);
+                const result = await applicationCollection.insertOne(applicationInfo);
                 res.send(result);
             }
         });
@@ -632,7 +631,7 @@ async function run() {
             res.send(result);
         });
 
-        // Send a ping to confirm a successful connection
+        // Send a ping to confirm a successful connection | ping off -> deploy
         // await client.db("admin").command({ ping: 1 });
         // console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
